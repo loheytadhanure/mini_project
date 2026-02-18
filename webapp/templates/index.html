@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Health Monitor | Smart Agriculture Dashboard</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i data-lucide="leaf"></i>
+            </div>
+            <div class="logo-text">
+                <h1>Farm Health Monitor</h1>
+                <span class="subtitle">Smart Agriculture Dashboard</span>
+            </div>
+        </div>
+        <div class="status-bar">
+            <div class="status-item" id="esp-status">
+                <span class="status-dot online"></span>
+                <span>ESP32: <strong>Offline</strong></span>
+            </div>
+            <div class="status-item" id="last-update">
+                <i data-lucide="clock"></i>
+                <span>Last Update: <strong>--:--:--</strong></span>
+            </div>
+            <div class="status-item" id="fps-display">
+                <i data-lucide="activity"></i>
+                <span>FPS: <strong>30</strong></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Grid -->
+    <main class="dashboard">
+        <!-- Left Column: Gauges + Alerts -->
+        <section class="left-column">
+            <div class="panel gauges-panel">
+                <h2 class="panel-title">
+                    <i data-lucide="gauge"></i>
+                    Live Sensors
+                </h2>
+                <div class="gauges-grid">
+                    <!-- Temperature Gauge -->
+                    <div class="gauge-container" id="temp-gauge">
+                        <svg class="gauge-svg" viewBox="0 0 120 120">
+                            <circle class="gauge-bg" cx="60" cy="60" r="50"/>
+                            <circle class="gauge-fill" cx="60" cy="60" r="50" 
+                                    stroke-dasharray="314" stroke-dashoffset="157"/>
+                            <text class="gauge-value" x="60" y="55">--</text>
+                            <text class="gauge-unit" x="60" y="75">°C</text>
+                        </svg>
+                        <div class="gauge-label">
+                            <i data-lucide="thermometer"></i>
+                            Temperature
+                        </div>
+                    </div>
+                    
+                    <!-- Humidity Gauge -->
+                    <div class="gauge-container" id="humidity-gauge">
+                        <svg class="gauge-svg" viewBox="0 0 120 120">
+                            <circle class="gauge-bg" cx="60" cy="60" r="50"/>
+                            <circle class="gauge-fill" cx="60" cy="60" r="50" 
+                                    stroke-dasharray="314" stroke-dashoffset="157"/>
+                            <text class="gauge-value" x="60" y="55">--</text>
+                            <text class="gauge-unit" x="60" y="75">%</text>
+                        </svg>
+                        <div class="gauge-label">
+                            <i data-lucide="droplets"></i>
+                            Humidity
+                        </div>
+                    </div>
+                    
+                    <!-- Soil Moisture Gauge -->
+                    <div class="gauge-container" id="moisture-gauge">
+                        <svg class="gauge-svg" viewBox="0 0 120 120">
+                            <circle class="gauge-bg" cx="60" cy="60" r="50"/>
+                            <circle class="gauge-fill" cx="60" cy="60" r="50" 
+                                    stroke-dasharray="314" stroke-dashoffset="157"/>
+                            <text class="gauge-value" x="60" y="55">--</text>
+                            <text class="gauge-unit" x="60" y="75">%</text>
+                        </svg>
+                        <div class="gauge-label">
+                            <i data-lucide="droplet"></i>
+                            Soil Moisture
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Panel -->
+            <div class="panel alerts-panel">
+                <h2 class="panel-title">
+                    <i data-lucide="bell"></i>
+                    Alerts
+                </h2>
+                <div class="alerts-list" id="alerts-container">
+                    <div class="alert-item info">
+                        <i data-lucide="info"></i>
+                        <span>System starting up...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Center Column: Camera + Weed Detection -->
+        <section class="center-column">
+            <!-- Live Camera Feed -->
+            <div class="panel camera-panel">
+                <h2 class="panel-title">
+                    <i data-lucide="video"></i>
+                    Live Camera Feed
+                </h2>
+                <div class="camera-container">
+                    <div class="camera-feed" id="camera-feed">
+                        <img src="/video_feed" id="camera-stream" alt="Live Camera Feed" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.5rem;">
+                    </div>
+                    <div class="camera-overlay">
+                        <span class="live-badge">● LIVE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weed Detection Result -->
+            <div class="panel detection-panel">
+                <h2 class="panel-title">
+                    <i data-lucide="scan"></i>
+                    Weed Detection
+                </h2>
+                <div class="detection-result" id="detection-result">
+                    <div class="detection-status clean" id="detection-status">
+                        <i data-lucide="check-circle"></i>
+                        <span>No Weed Found</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-label">
+                            <span>Confidence</span>
+                            <span id="confidence-value">92%</span>
+                        </div>
+                        <div class="confidence-track">
+                            <div class="confidence-fill" id="confidence-fill" style="width: 92%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Heatmap -->
+        <section class="right-column">
+            <div class="panel heatmap-panel">
+                <h2 class="panel-title">
+                    <i data-lucide="grid-3x3"></i>
+                    Weed Heatmap
+                </h2>
+                <div class="heatmap-container">
+                    <div class="heatmap-legend">
+                        <div class="legend-item">
+                            <span class="legend-color clean"></span>
+                            <span>Clean</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color weed"></span>
+                            <span>Weed</span>
+                        </div>
+                    </div>
+                    <div class="heatmap-grid" id="heatmap-grid">
+                        <!-- 5x5 grid will be generated by JS -->
+                    </div>
+                    <div class="heatmap-stats">
+                        <div class="stat">
+                            <span class="stat-label">Clean Zones</span>
+                            <span class="stat-value" id="clean-count">--</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Weed Zones</span>
+                            <span class="stat-value danger" id="weed-count">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Section: Charts -->
+    <section class="charts-section">
+        <div class="panel chart-panel">
+            <h2 class="panel-title">
+                <i data-lucide="line-chart"></i>
+                Sensor History
+            </h2>
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3>Temperature Over Time</h3>
+                    <canvas id="temp-chart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3>Soil Moisture Over Time</h3>
+                    <canvas id="moisture-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
